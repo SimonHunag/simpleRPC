@@ -7,8 +7,12 @@
  */
 package cn.simple.net;
 
+import cn.simple.coder.RpcDecoder;
+import cn.simple.coder.RpcEncoder;
 import cn.simple.common.NamedThreadFactory;
-import cn.simple.handler.HelloServerInHandler;
+import cn.simple.common.RpcRequest;
+import cn.simple.common.RpcResponse;
+import cn.simple.handler.RpcServerHandler;
 import cn.simple.server.HttpServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -68,7 +72,10 @@ public class NettyServer implements HttpServer {
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
 				ChannelPipeline channelPipeline = ch.pipeline();
-				channelPipeline.addLast(new HelloServerInHandler());
+				channelPipeline.addLast(new RpcEncoder(RpcResponse.class));
+				channelPipeline.addLast(new RpcDecoder(RpcRequest.class));
+				//channelPipeline.addLast(new HelloServerInHandler());
+				channelPipeline.addLast(new RpcServerHandler());
 			}
 		};
 	}
@@ -81,17 +88,5 @@ public class NettyServer implements HttpServer {
 		} catch (Exception ignore) { // NOPMD
 		}
 	}
-
 	/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	public void setKeepAlive(boolean keepAlive) {
-		this.keepAlive = keepAlive;
-	}
-
-	public void setDaemon(boolean daemon) {
-		this.daemon = daemon;
-	}
-
-	public void setIoWorkerCount(int ioWorkerCount) {
-		this.ioWorkerCount = ioWorkerCount;
-	}
 }

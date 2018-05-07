@@ -10,16 +10,17 @@ package cn.simple.client;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 
+import cn.simple.coder.RpcDecoder;
+import cn.simple.coder.RpcEncoder;
 import cn.simple.common.RpcRequest;
+import cn.simple.common.RpcResponse;
+import cn.simple.handler.RpcClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 
 /**
  * HelloClientTest
@@ -32,6 +33,7 @@ public class HelloClientTest {
 		RpcRequest request = new RpcRequest();
 		try {
 			final CountDownLatch completedSignal = new CountDownLatch(1);
+			final RpcResponse response = new RpcResponse();
 			Bootstrap bootstrap = new Bootstrap();
 			bootstrap.group(workerGroup);
 			bootstrap.channel(NioSocketChannel.class);
@@ -40,7 +42,10 @@ public class HelloClientTest {
 				@Override
 				public void initChannel(SocketChannel ch) throws Exception {
 					ChannelPipeline channelPipeline = ch.pipeline();
-					channelPipeline.addLast(new HelloClientIntHandler());
+					//channelPipeline.addLast(new HelloClientIntHandler());
+					channelPipeline.addLast(new RpcEncoder(RpcRequest.class));
+					channelPipeline.addLast(new RpcDecoder(RpcResponse.class));
+					channelPipeline.addLast(new RpcClientHandler(response));
 				}
 			});
 			ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
