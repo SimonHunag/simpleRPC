@@ -31,6 +31,10 @@ public class HelloClientTest {
 	public void connect(String host, int port) throws Exception {
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		RpcRequest request = new RpcRequest();
+		request.setClassName("cn.simple.service.HelloService");
+		request.setMethodName("sayHi");
+		request.setParamTypes(new Class[]{String.class});
+		request.setParams(new String[]{"go"});
 		try {
 			final CountDownLatch completedSignal = new CountDownLatch(1);
 			final RpcResponse response = new RpcResponse();

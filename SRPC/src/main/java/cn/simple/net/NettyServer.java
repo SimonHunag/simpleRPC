@@ -21,6 +21,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * NettyJaxrsServer
@@ -45,6 +47,15 @@ public class NettyServer implements HttpServer {
 	/** 是否测试长连接的状态 */
 	protected boolean keepAlive = false;
 	private int maxRequestSize = 1024 * 1024 * 10;
+	private Map<String, Object> serviceHandle;
+
+	public NettyServer(){
+		serviceHandle = new HashMap<String, Object>();
+	}
+
+	public NettyServer(Map<String, Object> serviceHandle) {
+		this.serviceHandle = serviceHandle;
+	}
 
 	@Override
 	public void start() {
@@ -74,8 +85,8 @@ public class NettyServer implements HttpServer {
 				ChannelPipeline channelPipeline = ch.pipeline();
 				channelPipeline.addLast(new RpcEncoder(RpcResponse.class));
 				channelPipeline.addLast(new RpcDecoder(RpcRequest.class));
-				//channelPipeline.addLast(new HelloServerInHandler());
-				channelPipeline.addLast(new RpcServerHandler());
+				// channelPipeline.addLast(new HelloServerInHandler());
+				channelPipeline.addLast(new RpcServerHandler(serviceHandle));
 			}
 		};
 	}
@@ -88,5 +99,6 @@ public class NettyServer implements HttpServer {
 		} catch (Exception ignore) { // NOPMD
 		}
 	}
+
 	/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 }

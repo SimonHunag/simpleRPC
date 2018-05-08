@@ -5,25 +5,17 @@
  * All Rights Reserved.
  * Note:Just limited to use by Mistong Educational Technology Co.,Ltd. Others are forbidden.
  */
-package cn.simple;
-
-import cn.simple.net.NettyServer;
+package cn.simple.exception;
 
 /**
- * NettyServerTest
+ * SRpcException
  *
- * Created by huapeng.hhp on 2018/5/1.
+ * Created by huapeng.hhp on 2018/5/8.
  */
-public class NettyServerTest {
-	public static void main(String[] args) {
-		NettyServer httpServer = new NettyServer();
-		httpServer.start();
-		while (true) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+public class SRpcException extends RuntimeException {
+	private static final long serialVersionUID = -8144316699720141293L;
+
+	public SRpcException(String message) {
+		super(message);
 	}
 }

@@ -1,2 +1,2 @@
-cn.simple.coder.serializer.KryoSerializer
 cn.simple.coder.serializer.FastJsonSerializer
+cn.simple.coder.serializer.KryoSerializer

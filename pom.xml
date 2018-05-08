@@ -48,6 +48,12 @@
             <version>${kryo.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.11</version>
+        </dependency>
+
     </dependencies>
 
 </project>
