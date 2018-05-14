@@ -17,7 +17,9 @@ import cn.simple.annotation.SRpcService;
 @SRpcService(value = HelloService.class)
 public class HelloServiceImpl implements HelloService {
 	@Override
-	public void sayHi(String name) {
+	public String sayHi(String name) {
+		String result = "Hello " + name;
 		System.out.println("Hello " + name);
+		return result;
 	}
 }

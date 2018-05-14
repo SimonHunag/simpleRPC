@@ -5,7 +5,7 @@
  * All Rights Reserved.
  * Note:Just limited to use by Mistong Educational Technology Co.,Ltd. Others are forbidden.
  */
-package cn.simple.client;
+package cn.simple.proxy;
 
 import cn.simple.coder.RpcDecoder;
 import cn.simple.coder.RpcEncoder;
@@ -18,34 +18,68 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * HelloClientTest
+ * JdkInvokeProxy
  *
- * Created by huapeng.hhp on 2018/5/1.
+ * Created by huapeng.hhp on 2018/5/11.
  */
-public class HelloClientTest {
-	public void connect(String host, int port) throws Exception {
+public class JdkInvokeProxy implements InvocationHandler {
+	/** 代理的类 */
+	private Object proxyClass;
+	private static final String host = "127.0.0.1";
+	private static final Integer port = 51001;
+	private Class<?> clazz;
+
+	public JdkInvokeProxy() {
+	}
+
+	public JdkInvokeProxy(Class<?> clazz) {
+		this.clazz = clazz;
+	}
+
+	public <T> T newProxy(Class<?> clazz) {
+		this.clazz = clazz;
+		if (proxyClass != null) {
+			return (T) proxyClass;
+		}
+		proxyClass = Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] { clazz }, this);
+		return (T) proxyClass;
+	}
+
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		String methodName = method.getName();
+		Class[] paramTypes = method.getParameterTypes();
+		if ("toString".equals(methodName) && paramTypes.length == 0) {
+			return method.toString();
+		} else if ("hashCode".equals(methodName) && paramTypes.length == 0) {
+			return method.hashCode();
+		}
+
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		RpcRequest request = new RpcRequest();
-		request.setClassName("cn.simple.service.HelloService");
-		request.setMethodName("sayHi");
-		request.setParamTypes(new Class[]{String.class});
-		request.setParams(new String[]{"go"});
+		request.setClassName(this.clazz.getName());
+		request.setMethodName(methodName);
+		request.setParamTypes(paramTypes);
+		request.setParams(args);
+		final RpcResponse response = new RpcResponse();
 		try {
 			final CountDownLatch completedSignal = new CountDownLatch(1);
-			final RpcResponse response = new RpcResponse();
 			Bootstrap bootstrap = new Bootstrap();
 			bootstrap.group(workerGroup);
 			bootstrap.channel(NioSocketChannel.class);
-			bootstrap.option(ChannelOption.SO_KEEPALIVE, false);
+			bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
 			bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 				@Override
 				public void initChannel(SocketChannel ch) throws Exception {
 					ChannelPipeline channelPipeline = ch.pipeline();
-					//channelPipeline.addLast(new HelloClientIntHandler());
+					// channelPipeline.addLast(new HelloClientIntHandler());
 					channelPipeline.addLast(new RpcEncoder(RpcRequest.class));
 					channelPipeline.addLast(new RpcDecoder(RpcResponse.class));
 					channelPipeline.addLast(new RpcClientHandler(response));
@@ -53,6 +87,7 @@ public class HelloClientTest {
 			});
 			ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
 			future.channel().writeAndFlush(request).addListener(new ChannelFutureListener() {
+				@Override
 				public void operationComplete(ChannelFuture channelFuture) throws Exception {
 					completedSignal.countDown();
 				}
@@ -63,10 +98,6 @@ public class HelloClientTest {
 		} finally {
 			workerGroup.shutdownGracefully();
 		}
-	}
-
-	public static void main(String[] args) throws Exception {
-		HelloClientTest client = new HelloClientTest();
-		client.connect("127.0.0.1", 51001);
+		return response.getResult();
 	}
 }

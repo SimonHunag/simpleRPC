@@ -45,7 +45,7 @@ public class NettyServer implements HttpServer {
 	/** 是否是守护线程 */
 	protected boolean daemon = true;
 	/** 是否测试长连接的状态 */
-	protected boolean keepAlive = false;
+	protected boolean keepAlive = true;
 	private int maxRequestSize = 1024 * 1024 * 10;
 	private Map<String, Object> serviceHandle;
 

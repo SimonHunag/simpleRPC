@@ -13,6 +13,5 @@ package cn.simple.service;
  * Created by huapeng.hhp on 2018/5/7.
  */
 public interface HelloService {
-
-	void sayHi(String name);
+	String sayHi(String name);
 }
