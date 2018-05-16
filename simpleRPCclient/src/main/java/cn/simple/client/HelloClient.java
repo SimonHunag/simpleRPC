@@ -7,20 +7,12 @@
  */
 package cn.simple.client;
 
-import cn.simple.proxy.JdkInvokeProxy;
-import cn.simple.service.HelloService;
-
 /**
- * HelloClientTest
+ * HelloClient
  *
- * Created by huapeng.hhp on 2018/5/1.
+ * Created by huapeng.hhp on 2018/5/15.
  */
-public class HelloClientTest1 {
-	public static void main(String[] args) throws Exception {
+public interface HelloClient {
 
-		JdkInvokeProxy proxy = new JdkInvokeProxy();
-		HelloService server = (HelloService) proxy.newProxy(HelloService.class);
-		String result  =server.sayHi("proxy1");
-		System.out.println(result+" client");
-	}
+    String say(String name);
 }

@@ -7,14 +7,17 @@
  */
 package cn.simple.server;
 
+import cn.simple.annotation.SRpcClinet;
 import cn.simple.annotation.SRpcService;
 import cn.simple.net.NettyServer;
+import cn.simple.proxy.JdkInvokeProxy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.CollectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +47,23 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 		for (Object bean : serviceMap.values()) {
 			String interfaceName = bean.getClass().getAnnotation(SRpcService.class).value().getName();
 			handlerMap.put(interfaceName, bean);
+		}
+		String[] beanNames = applicationContext.getBeanDefinitionNames();
+		if (beanNames != null && beanNames.length > 0) {
+			for (String beanName : beanNames) {
+				Object bean = applicationContext.getBean(beanName);
+				for (Field field : bean.getClass().getDeclaredFields()) {
+					if (field.isAnnotationPresent(SRpcClinet.class)) {
+						JdkInvokeProxy proxy = new JdkInvokeProxy();
+						field.setAccessible(true);
+						try {
+							field.set(bean, proxy.newProxy(field.getType()));
+						} catch (IllegalAccessException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		}
 	}
 }

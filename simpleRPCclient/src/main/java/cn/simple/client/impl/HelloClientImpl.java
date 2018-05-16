@@ -5,22 +5,24 @@
  * All Rights Reserved.
  * Note:Just limited to use by Mistong Educational Technology Co.,Ltd. Others are forbidden.
  */
-package cn.simple.client;
+package cn.simple.client.impl;
 
-import cn.simple.proxy.JdkInvokeProxy;
+import cn.simple.annotation.SRpcClinet;
+import cn.simple.client.HelloClient;
 import cn.simple.service.HelloService;
 
 /**
- * HelloClientTest
+ * HelloClientImpl
  *
- * Created by huapeng.hhp on 2018/5/1.
+ * Created by huapeng.hhp on 2018/5/15.
  */
-public class HelloClientTest1 {
-	public static void main(String[] args) throws Exception {
+public class HelloClientImpl implements HelloClient{
 
-		JdkInvokeProxy proxy = new JdkInvokeProxy();
-		HelloService server = (HelloService) proxy.newProxy(HelloService.class);
-		String result  =server.sayHi("proxy1");
-		System.out.println(result+" client");
-	}
+    @SRpcClinet(value = HelloService.class)
+    private HelloService helloService;
+
+    @Override
+    public String say(String name) {
+        return helloService.sayHi(name);
+    }
 }
