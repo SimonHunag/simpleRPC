@@ -32,5 +32,8 @@
 2.客户端通过proxy执行
 
 * proxy的原理需要去了解InvocationHandler与Proxy的一些原理
+* 系统初始化的时候，对client端的bean中的 field做proxy处理
+
+
 ##
 

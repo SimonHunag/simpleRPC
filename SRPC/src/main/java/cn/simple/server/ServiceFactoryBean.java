@@ -40,14 +40,6 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
-		Map<String, Object> serviceMap = applicationContext.getBeansWithAnnotation(SRpcService.class);
-		if (CollectionUtils.isEmpty(serviceMap)) {
-			return;
-		}
-		for (Object bean : serviceMap.values()) {
-			String interfaceName = bean.getClass().getAnnotation(SRpcService.class).value().getName();
-			handlerMap.put(interfaceName, bean);
-		}
 		String[] beanNames = applicationContext.getBeanDefinitionNames();
 		if (beanNames != null && beanNames.length > 0) {
 			for (String beanName : beanNames) {
@@ -64,6 +56,14 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 					}
 				}
 			}
+		}
+		Map<String, Object> serviceMap = applicationContext.getBeansWithAnnotation(SRpcService.class);
+		if (CollectionUtils.isEmpty(serviceMap)) {
+			return;
+		}
+		for (Object bean : serviceMap.values()) {
+			String interfaceName = bean.getClass().getAnnotation(SRpcService.class).value().getName();
+			handlerMap.put(interfaceName, bean);
 		}
 	}
 }
