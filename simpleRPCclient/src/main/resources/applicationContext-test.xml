@@ -12,6 +12,6 @@
     <!--Read values from property file-->
     <bean name="helloClient" class="cn.simple.client.impl.HelloClientImpl"/>
 
-    <import resource="simple-rpc-server.xml"/>
+    <bean id="clientFactoryBean-client" class="cn.simple.client.ClientFactoryBean" />
 
 </beans>

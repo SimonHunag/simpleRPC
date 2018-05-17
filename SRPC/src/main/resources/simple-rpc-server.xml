@@ -13,5 +13,8 @@
     <!--RPC server-->
     <bean id="serviceFactoryBean-server" class="cn.simple.server.ServiceFactoryBean" />
 
+    <!--RPC client-->
+    <bean id="clientFactoryBean-client" class="cn.simple.client.ClientFactoryBean" />
+
 
 </beans>
