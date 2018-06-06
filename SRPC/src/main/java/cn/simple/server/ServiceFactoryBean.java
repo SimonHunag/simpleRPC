@@ -9,12 +9,17 @@ package cn.simple.server;
 
 import cn.simple.annotation.SRpcService;
 import cn.simple.net.NettyServer;
+import cn.simple.utils.NetUtils;
+import cn.simple.zk.CuratorZookeeperClient;
+import cn.simple.zk.ZookeeperClient;
+import cn.simple.zk.conf.ZKConfig;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.CollectionUtils;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +41,7 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-
+		this.applicationContext = applicationContext;
 		Map<String, Object> serviceMap = applicationContext.getBeansWithAnnotation(SRpcService.class);
 		if (CollectionUtils.isEmpty(serviceMap)) {
 			return;
@@ -45,5 +50,24 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 			String interfaceName = bean.getClass().getAnnotation(SRpcService.class).value().getName();
 			handlerMap.put(interfaceName, bean);
 		}
+		// 注册到zookeeper
+		doRegister();
+	}
+
+	private void doRegister() {
+		ZKConfig config = new ZKConfig();
+		config.setAddress("10.0.0.28:2181");
+		config.setAppName("SRPC");
+		config.setAppPort("51001");
+		ZookeeperClient client = new CuratorZookeeperClient(config);
+		String servicePath = "/srpc/" + config.getAppName();
+		client.create(servicePath, false);
+		InetAddress inetAddress = NetUtils.getLocalAddress();
+		for (Map.Entry<String, Object> hardler : handlerMap.entrySet()) {
+			String childPath = servicePath + "/" + hardler.getKey() + "@" + inetAddress.getHostAddress() + ":"
+					+ config.getAppPort();
+			client.create(childPath, true);
+		}
+		System.out.println(client.getChildren(servicePath));
 	}
 }
