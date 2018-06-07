@@ -8,13 +8,16 @@
 package cn.simple.server;
 
 import cn.simple.annotation.SRpcService;
+import cn.simple.conf.PropertyPlaceholder;
 import cn.simple.net.NettyServer;
 import cn.simple.utils.NetUtils;
+import cn.simple.utils.RegistryUtil;
 import cn.simple.zk.CuratorZookeeperClient;
 import cn.simple.zk.ZookeeperClient;
 import cn.simple.zk.conf.ZKConfig;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.CollectionUtils;
@@ -32,6 +35,12 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 	private ApplicationContext applicationContext;
 	private Map<String, Object> handlerMap = new HashMap<String, Object>();
 	private volatile HttpServer httpServer;
+	@Value("${zookeeper.address}")
+	private String zookeeperAddress;
+	@Value("${simple.port}")
+	private String appPort;
+	@Value("${app.name}")
+	private String appName;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -56,18 +65,17 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 
 	private void doRegister() {
 		ZKConfig config = new ZKConfig();
-		config.setAddress("10.0.0.28:2181");
-		config.setAppName("SRPC");
-		config.setAppPort("51001");
+		config.setAddress(PropertyPlaceholder.getStrProperty("zookeeper.address"));
+		config.setAppPort(PropertyPlaceholder.getStrProperty("simple.port"));
 		ZookeeperClient client = new CuratorZookeeperClient(config);
-		String servicePath = "/srpc/" + config.getAppName();
-		client.create(servicePath, false);
+		client.create(RegistryUtil.getServicePath(), false);
 		InetAddress inetAddress = NetUtils.getLocalAddress();
 		for (Map.Entry<String, Object> hardler : handlerMap.entrySet()) {
-			String childPath = servicePath + "/" + hardler.getKey() + "@" + inetAddress.getHostAddress() + ":"
-					+ config.getAppPort();
-			client.create(childPath, true);
+			String childPath = RegistryUtil.getChildPath(hardler.getKey());
+			client.create(childPath, false);
+			String pchildPath = childPath + "/" + inetAddress.getHostAddress() + ":" + config.getAppPort();
+			client.create(pchildPath, true);
+			System.out.println(client.getChildren(childPath));
 		}
-		System.out.println(client.getChildren(servicePath));
 	}
 }

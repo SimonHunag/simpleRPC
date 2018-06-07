@@ -20,7 +20,16 @@ public class HelloClientTest2 {
     public static void main(String[] args) throws Exception {
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext-test.xml");
         HelloClient client = (HelloClient) context.getBean("helloClient");
-        String result = client.say("Proxy2");
-        System.out.println(result+" client");
+
+        while (true) {
+            try {
+                String result = client.say("Proxy2");
+                System.out.println(result+" client");
+
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

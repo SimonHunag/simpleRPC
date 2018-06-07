@@ -16,5 +16,10 @@
     <!--RPC client-->
     <bean id="clientFactoryBean-client" class="cn.simple.client.ClientFactoryBean" />
 
+    <bean id="propertyConfigurer" class="cn.simple.conf.PropertyPlaceholder">
+        <property name="location">
+            <value>classpath:simple.properties</value>
+        </property>
+    </bean>
 
 </beans>

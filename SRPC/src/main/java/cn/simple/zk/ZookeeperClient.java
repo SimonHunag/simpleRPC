@@ -7,6 +7,8 @@
  */
 package cn.simple.zk;
 
+import org.apache.curator.framework.CuratorFramework;
+
 import java.util.List;
 
 /**
@@ -31,4 +33,10 @@ public interface ZookeeperClient {
      * @return
      */
 	List<String> getChildren(String path);
+
+	/**
+	 * 获取连接
+	 * @return
+	 */
+	CuratorFramework getCuratorFramework();
 }
