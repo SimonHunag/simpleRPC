@@ -13,6 +13,8 @@
         <netty.version>4.1.13.Final</netty.version>
         <fastjson.version>1.2.47</fastjson.version>
         <kryo.version>2.16</kryo.version>
+        <zookeeper.version>3.4.12</zookeeper.version>
+        <curator.version>4.0.1</curator.version>
     </properties>
 
 
@@ -48,6 +50,34 @@
             <version>${kryo.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>${zookeeper.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>

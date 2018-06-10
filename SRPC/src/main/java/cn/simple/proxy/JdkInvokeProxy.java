@@ -12,6 +12,7 @@ import cn.simple.coder.RpcEncoder;
 import cn.simple.common.RpcRequest;
 import cn.simple.common.RpcResponse;
 import cn.simple.handler.RpcClientHandler;
+import cn.simple.net.URL;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -22,6 +23,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -35,8 +38,15 @@ public class JdkInvokeProxy implements InvocationHandler {
 	private static final String host = "127.0.0.1";
 	private static final Integer port = 51001;
 	private Class<?> clazz;
+	private List<URL> urls;
+
+	private	Random random =  new Random(1);
 
 	public JdkInvokeProxy() {
+	}
+
+	public JdkInvokeProxy(List<URL> urls) {
+		this.urls = urls;
 	}
 
 	public JdkInvokeProxy(Class<?> clazz) {
@@ -54,6 +64,11 @@ public class JdkInvokeProxy implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+		if(urls==null || urls.size()==0){
+			return null;
+		}
+
 		String methodName = method.getName();
 		Class[] paramTypes = method.getParameterTypes();
 		if ("toString".equals(methodName) && paramTypes.length == 0) {
@@ -85,7 +100,13 @@ public class JdkInvokeProxy implements InvocationHandler {
 					channelPipeline.addLast(new RpcClientHandler(response));
 				}
 			});
-			ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
+
+			// 随机负载方式
+
+
+			URL url= urls.get(random.nextInt(urls.size()));
+
+			ChannelFuture future = bootstrap.connect(new InetSocketAddress(url.getHost(), url.getPort())).sync();
 			future.channel().writeAndFlush(request).addListener(new ChannelFutureListener() {
 				@Override
 				public void operationComplete(ChannelFuture channelFuture) throws Exception {
@@ -99,5 +120,13 @@ public class JdkInvokeProxy implements InvocationHandler {
 			workerGroup.shutdownGracefully();
 		}
 		return response.getResult();
+	}
+
+	public List<URL> getUrls() {
+		return urls;
+	}
+
+	public void setUrls(List<URL> urls) {
+		this.urls = urls;
 	}
 }

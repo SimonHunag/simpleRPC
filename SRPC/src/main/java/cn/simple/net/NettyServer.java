@@ -12,14 +12,17 @@ import cn.simple.coder.RpcEncoder;
 import cn.simple.common.NamedThreadFactory;
 import cn.simple.common.RpcRequest;
 import cn.simple.common.RpcResponse;
+import cn.simple.conf.PropertyPlaceholder;
 import cn.simple.handler.RpcServerHandler;
 import cn.simple.server.HttpServer;
+import cn.simple.utils.NetUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,12 +52,22 @@ public class NettyServer implements HttpServer {
 	private int maxRequestSize = 1024 * 1024 * 10;
 	private Map<String, Object> serviceHandle;
 
-	public NettyServer(){
+	public NettyServer() {
 		serviceHandle = new HashMap<String, Object>();
+		this.port = Integer.valueOf(PropertyPlaceholder.getStrProperty("simple.port"));
+		InetAddress inetAddress = NetUtils.getLocalAddress();
+		if (inetAddress != null) {
+			this.hostname = inetAddress.getHostAddress();
+		}
 	}
 
 	public NettyServer(Map<String, Object> serviceHandle) {
 		this.serviceHandle = serviceHandle;
+		this.port = Integer.valueOf(PropertyPlaceholder.getStrProperty("simple.port"));
+		InetAddress inetAddress = NetUtils.getLocalAddress();
+		if (inetAddress != null) {
+			this.hostname = inetAddress.getHostAddress();
+		}
 	}
 
 	@Override
@@ -99,6 +112,5 @@ public class NettyServer implements HttpServer {
 		} catch (Exception ignore) { // NOPMD
 		}
 	}
-
 	/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 }
