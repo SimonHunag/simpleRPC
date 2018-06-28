@@ -25,8 +25,8 @@ public abstract class AbstractZookeeperClient implements ZookeeperClient {
 	private final CuratorFramework curatorFramework;
 
 	public AbstractZookeeperClient(ZKConfig zkConfig) {
-		curatorFramework = CuratorFrameworkFactory.newClient(zkConfig.getAddress(),
-				new RetryNTimes(Integer.MAX_VALUE, 1000));
+		curatorFramework = CuratorFrameworkFactory.newClient(zkConfig.getAddress(), zkConfig.getSessionTimeOut(),
+				zkConfig.getConnectionTimeOut(), new RetryNTimes(Integer.MAX_VALUE, 1000));
 		curatorFramework.start();
 	}
 

@@ -16,12 +16,14 @@ import cn.simple.zk.CuratorZookeeperClient;
 import cn.simple.zk.ZookeeperClient;
 import cn.simple.zk.conf.ZKConfig;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PreDestroy;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +33,9 @@ import java.util.Map;
  *
  * Created by huapeng.hhp on 2018/5/1.
  */
-public class ServiceFactoryBean implements InitializingBean, ApplicationContextAware {
+public class ServiceFactoryBean implements InitializingBean,DisposableBean, ApplicationContextAware {
+
+	private ZookeeperClient client;
 	private ApplicationContext applicationContext;
 	private Map<String, Object> handlerMap = new HashMap<String, Object>();
 	private volatile HttpServer httpServer;
@@ -67,7 +71,10 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 		ZKConfig config = new ZKConfig();
 		config.setAddress(PropertyPlaceholder.getStrProperty("zookeeper.address"));
 		config.setAppPort(PropertyPlaceholder.getStrProperty("simple.port"));
-		ZookeeperClient client = new CuratorZookeeperClient(config);
+		if(client==null){
+			client = new CuratorZookeeperClient(config);
+		}
+
 		client.create(RegistryUtil.getServicePath(), false);
 		InetAddress inetAddress = NetUtils.getLocalAddress();
 		for (Map.Entry<String, Object> hardler : handlerMap.entrySet()) {
@@ -77,5 +84,19 @@ public class ServiceFactoryBean implements InitializingBean, ApplicationContextA
 			client.create(pchildPath, true);
 			System.out.println(client.getChildren(childPath));
 		}
+	}
+
+	@Override
+	@PreDestroy
+	public void destroy() throws Exception {
+
+		ZKConfig config = new ZKConfig();
+		config.setAddress(PropertyPlaceholder.getStrProperty("zookeeper.address"));
+		config.setAppPort(PropertyPlaceholder.getStrProperty("simple.port"));
+		if(client==null){
+			client = new CuratorZookeeperClient(config);
+		}
+
+		client.getCuratorFramework().close();
 	}
 }

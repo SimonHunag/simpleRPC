@@ -21,15 +21,18 @@ public class HelloClientTest2 {
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext-test.xml");
         HelloClient client = (HelloClient) context.getBean("helloClient");
 
-        while (true) {
+        int i = 0;
+        while (i<100) {
             try {
                 String result = client.say("Proxy2");
                 System.out.println(result+" client");
 
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+            i++;
         }
+
     }
 }

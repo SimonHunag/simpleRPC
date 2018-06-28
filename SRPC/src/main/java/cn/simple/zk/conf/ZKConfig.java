@@ -24,9 +24,9 @@ public class ZKConfig implements Serializable {
 	/** 是netty的端口号不是zk的*/
 	private String appPort;
 	/** 连接超时时间 */
-	private Integer connectionTimeOut = 5000;
+	private Integer connectionTimeOut = 3000;
 	/** session超时时间 */
-	private Integer sessionTimeOut = 60 * 1000;
+	private Integer sessionTimeOut = 3 * 1000;
 
 	public String getAppPort() {
 		return appPort;
